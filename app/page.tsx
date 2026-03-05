@@ -52,7 +52,7 @@ export default function Home() {
                   ].map((product, index) => (
                     <div
                       key={index}
-                      className="flex justify-between items-center py-4 border-b border-black/20 hover:bg-black/5 transition-colors cursor-pointer group"
+                      className="flex justify-between items-center py-4  border-b border-black/20 hover:bg-black/5 transition-colors cursor-pointer group"
                     >
                       <span className="text-xl md:text-2xl font-sans font-medium text-black group-hover:translate-x-2 transition-transform">
                         {product.name}

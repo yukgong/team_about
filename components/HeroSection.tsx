@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import FlyingBugsAnimation from './FlyingBugsAnimation';
+import BugInteractionOverlay from './BugInteractionOverlay';
 import Clock from './Clock';
 
 // 스크롤 진행률 (0~1) 계산 훅
@@ -32,7 +33,7 @@ export default function HeroSection() {
   const [animationScale, setAnimationScale] = useState(0.9);
   const [topPosition, setTopPosition] = useState('-3em');
   // 0.8 이후에 불투명해짐
-  const bgOpacity = progress > 0.85 ? 1 : 0;
+  const bgOpacity = progress > 0.55 ? 1 : 0;
 
   // Nav 높이를 전역으로 공유 + 애니메이션 스케일 반응형
   useEffect(() => {
@@ -54,8 +55,8 @@ export default function HeroSection() {
   return (
     <>
       {/* Background Stage - Fixed behind everything */}
-      <div className="fixed inset-0 z-0 bg-[#361a07]">
-        <div className="w-full h-full flex items-center justify-center">
+      <div className="fixed inset-0 z-0 bg-[#e8d7c9]">
+        <div className="w-full h-full flex items-center justify-center relative">
           <div
             className="w-full h-full"
             style={{
@@ -65,9 +66,11 @@ export default function HeroSection() {
           >
             <FlyingBugsAnimation
               imageUrl="/animation.gif"
-              style={{ width: '100%', height: '100%', display: 'flex', scale: animationScale, justifyContent: 'center', alignItems: 'center', top: topPosition }}
+              style={{ width: '100vw', height: '100vh', display: 'flex', scale: animationScale, justifyContent: 'center', alignItems: 'center', top: topPosition }}
             />
           </div>
+          {/* Bug Interaction Overlay - Click to splat! */}
+          <BugInteractionOverlay totalBugs={8} />
         </div>
       </div>
 
@@ -81,7 +84,7 @@ export default function HeroSection() {
           <div className="max-w-[200px]">
             <p
               className="text-sm font-sans leading-snug transition-colors duration-100"
-              style={{ color: progress > 0.85? '#000' : '#fff' }}
+              // style={{ color: progress > 0.85? '#000' : '#fff' }}
             >
               R&D Driven EdTech
               <br />
@@ -93,7 +96,7 @@ export default function HeroSection() {
 
           <div
             className="hidden md:flex items-center gap-12 text-sm font-sans transition-colors duration-100"
-            style={{ color: progress > 0.85? '#000' : '#fff' }}
+            // style={{ color: progress > 0.85? '#000' : '#fff' }}
           >
             <span>Everywhere in Education</span>
             <span className="opacity-70">(not just LMS)</span>
@@ -101,12 +104,12 @@ export default function HeroSection() {
 
           <div
             className="flex items-center gap-8 text-sm font-sans transition-colors duration-100"
-            style={{ color: progress > 0.85? '#000' : '#fff' }}
+            // style={{ color: progress > 0.85? '#000' : '#fff' }}
           >
             <div className="flex items-center gap-2">
               <span
                 className="w-2 h-2 rounded-full transition-colors duration-100"
-                style={{ backgroundColor: progress > 0.85 ? '#000' : '#fff' }}
+                // style={{ backgroundColor: progress > 0.85 ? '#000' : '#fff' }}
               ></span>
               <Clock />
             </div>
@@ -175,7 +178,7 @@ export function HeroTitle() {
     <>
       {/* Spacer - 배경 애니메이션이 보이는 영역 */}
       <div
-        className="relative z-10"
+        className="relative z-10 pointer-events-none"
         style={{ height: spacerHeight }}
       />
 
@@ -191,13 +194,14 @@ export function HeroTitle() {
         <div className="px-4 md:px-8 py-4">
           <div className="mx-auto">
             <Image
-              src="/logo_text.svg"
+              src="/logo_text1.svg"
               alt="IHATEFLYINGBUGS"
               width={1305}
               height={193}
               className="w-full h-auto max-w-full transition-all duration-100"
-              style={{ filter: progress > 0.85 ? 'none' : 'invert(1)' }}
+              // style={{ filter: progress > 0.85 ? 'none' : 'invert(1)' }}
               priority
+              unoptimized
             />
           </div>
         </div>

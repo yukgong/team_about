@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { parseGIF, decompressFrames } from 'gifuct-js';
 
 // Type definitions
@@ -48,92 +48,72 @@ interface FlyingBugsAnimationProps {
   isGif?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  canvasStyle?: React.CSSProperties;
 }
 
-const DEFAULT_CONFIG: AsciiConfig = {
-  "width": 1200,
-  "height": 1200,
-  "cellSize": 8,
-  "fontSize": 9,
-  "bugFontSize": 59,
-  "bugCount": 10,
+export const DEFAULT_CONFIG: AsciiConfig = {
+  "width": 1800,
+  "height": 1800,
+  "cellSize": 12,
+  "fontSize": 27,
+  "bugFontSize": 67,
+  "bugCount": 40,
   "bugSpeed": 2,
   "bugChars": [
     "※",
     "*",
     "✱",
     "✦",
-    "●",
     "❋",
     "❊",
     "✳︎"
   ],
-  "bugMorphSpeed": 1000,
+  "bugMorphSpeed": 680,
   "backgroundChar": "-",
-  "backgroundColor": "#e8d7c9",
-  "canvasBackgroundColor": "#361a07",
+  "backgroundColor": "#cb976c",
+  "canvasBackgroundColor": "#e8d7c9",
   "bugColors": [
-    "#0F97FF",
-    "#29A873",
-    "#F96706"
+    "#1c875b",
+    "#a9490a",
+    "#0c558d"
   ],
   "density": 0,
   "spacing": 0,
   "animationSpeed": 10,
   "trail": false,
   "preprocessing": {
-    "blur": 0,
-    "grain": 1,
-    "gamma": 0.52,
-    "blackPoint": 235,
-    "whitePoint": 12,
-    "threshold": 237,
+    "blur": 1,
+    "grain": 0,
+    "gamma": 1.14,
+    "blackPoint": 255,
+    "whitePoint": 233,
+    "threshold": 231,
     "showEffect": true,
     "invert": true,
     "dithering": true,
-    "ditheringStrength": 65
+    "ditheringStrength": 50
   },
   "useBrightnessMapping": true,
   "brightnessLevels": [
     {
-      "threshold": 60,
-      "char": "◼",
+      "threshold": 0,
+      "char": " ",
       "name": "Very Dark"
     },
     {
-      "threshold": 80,
+      "threshold": 1,
       "char": "▓",
       "name": "Custom"
     },
     {
-      "threshold": 163,
+      "threshold": 100,
       "char": "▒",
-      "name": "Dark"
+      "name": "Custom"
     },
     {
-      "threshold": 196,
+      "threshold": 220,
       "char": "░",
-      "name": "Dark-Medium"
-    },
-    {
-      "threshold": 240,
-      "char": "∴",
-      "name": "Medium-Light"
-    },
-    {
-      "threshold": 241,
-      "char": "✕",
-      "name": "Medium"
-    },
-    {
-      "threshold": 250,
-      "char": "⋮",
-      "name": "Light"
-    },
-    {
-      "threshold": 255,
-      "char": "・",
-      "name": "Very Light"
+      "name": "Custom"
     }
   ]
 };
@@ -144,9 +124,9 @@ export default function FlyingBugsAnimation({
   isGif = true,
   className,
   style,
+  canvasStyle,
 }: FlyingBugsAnimationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [status, setStatus] = useState<string>('Loading...');
   const animationFrameRef = useRef<number>();
 
   useEffect(() => {
@@ -665,7 +645,6 @@ export default function FlyingBugsAnimation({
       }
 
       const averageDelay = totalDelay > 0 ? Math.round(totalDelay / imageFrames.length) : 100;
-      console.log(`✅ Loaded ${imageFrames.length} GIF frames (avg delay: ${averageDelay}ms)`);
 
       return { frames: imageFrames, delay: averageDelay };
     }
@@ -728,32 +707,22 @@ export default function FlyingBugsAnimation({
       try {
         if (imageUrl && isGif) {
           // Load GIF
-          setStatus('Loading GIF...');
           const gifData = await loadGifFrames(imageUrl);
           imageFrames = gifData.frames;
           gifFrameDelay = gifData.delay;
           (config as any).imageData = imageFrames[0];
-          setStatus(`✅ GIF loaded: ${imageFrames.length} frames`);
-          console.log(`GIF loaded: ${imageFrames.length} frames, delay: ${gifFrameDelay}ms`);
         } else if (imageUrl) {
           // Load static image
-          setStatus('Loading image...');
           const imgData = await loadImageData(imageUrl);
           if (imgData) {
             (config as any).imageData = imgData;
-            setStatus(`✅ Loaded ${imgData.width}x${imgData.height}`);
           }
-        } else {
-          setStatus('✅ Ready');
         }
 
         bugs = initializeBugs(config);
         animate(0);
-
-        setTimeout(() => setStatus(''), 2000);
       } catch (error) {
         console.error('Failed to load:', error);
-        setStatus(`❌ Failed to load ${isGif ? 'GIF' : 'image'}`);
       }
     }
 
@@ -778,33 +747,48 @@ export default function FlyingBugsAnimation({
 
     init();
 
+    // Listen for bug kill events from interaction overlay
+    const handleBugKill = (e: CustomEvent<{ canvasX: number; canvasY: number }>) => {
+      const { canvasX, canvasY } = e.detail;
+      const actualCellSize = config.cellSize + (config.spacing || 0);
+
+      // Convert canvas coordinates to grid coordinates
+      const gridX = canvasX / actualCellSize;
+      const gridY = canvasY / actualCellSize;
+
+      // Find and remove bugs within kill radius
+      const killRadius = 6;
+      const prevCount = bugs.length;
+      bugs = bugs.filter(bug => {
+        const dx = bug.x - gridX;
+        const dy = bug.y - gridY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance > killRadius;
+      });
+      const killedCount = prevCount - bugs.length;
+
+      // Dispatch result event with killed count
+      if (killedCount > 0) {
+        window.dispatchEvent(
+          new CustomEvent('bugKillResult', {
+            detail: { killedCount },
+          })
+        );
+      }
+    };
+
+    window.addEventListener('bugKill', handleBugKill as EventListener);
+
     return () => {
       if (animationId) {
         cancelAnimationFrame(animationId);
       }
+      window.removeEventListener('bugKill', handleBugKill as EventListener);
     };
   }, [customConfig, imageUrl, isGif]);
 
   return (
     <div className={className} style={{ position: 'relative', ...style }}>
-      {status && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 10,
-            left: 10,
-            color: '#0f0',
-            fontFamily: 'monospace',
-            fontSize: 12,
-            background: 'rgba(0,0,0,0.7)',
-            padding: 10,
-            borderRadius: 5,
-            zIndex: 1000,
-          }}
-        >
-          {status}
-        </div>
-      )}
       <canvas
         ref={canvasRef}
         style={{

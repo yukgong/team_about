@@ -13,9 +13,9 @@ interface Project {
 const projects: Project[] = [
   {
     num: '01',
-    title: 'MILDANG LMS',
+    title: 'MILDANG PT',
     tags: ['Platform', 'AI', 'Education'],
-    year: '2024',
+    year: '2021',
     image: '/projects/mildang-lms.jpg',
   },
   {
@@ -49,13 +49,12 @@ const projects: Project[] = [
 ];
 
 export default function WorkSection() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [stickyTop, setStickyTop] = useState(200); // 초기값
+  const [stickyTop, setStickyTop] = useState(200);
   const sectionRef = useRef<HTMLElement>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const headerHeight = 56; // 각 프로젝트 헤더 높이
+  const workHeaderHeight = 48; // Work 헤더 높이
 
   useEffect(() => {
-    // CSS 변수에서 nav + title 높이 가져오기
     const updateStickyTop = () => {
       const navHeight = parseInt(
         getComputedStyle(document.documentElement).getPropertyValue('--nav-height') || '100',
@@ -68,51 +67,20 @@ export default function WorkSection() {
       setStickyTop(navHeight + titleHeight);
     };
 
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-
-      const sectionRect = sectionRef.current.getBoundingClientRect();
-
-      // 섹션이 뷰포트에 들어왔는지 확인
-      if (sectionRect.top > window.innerHeight || sectionRect.bottom < 0) {
-        setActiveIndex(null);
-        return;
-      }
-
-      // 각 아이템의 위치 확인
-      let newActiveIndex: number | null = null;
-
-      itemRefs.current.forEach((ref, index) => {
-        if (!ref) return;
-        const rect = ref.getBoundingClientRect();
-
-        // 아이템이 sticky 위치에 도달했는지 확인
-        if (rect.top <= stickyTop + 50) {
-          newActiveIndex = index;
-        }
-      });
-
-      setActiveIndex(newActiveIndex);
-    };
-
-    // 초기 측정 (CSS 변수 설정 대기)
     const timer = setTimeout(updateStickyTop, 100);
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', updateStickyTop);
 
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', updateStickyTop);
     };
-  }, [stickyTop]);
+  }, []);
 
   return (
     <section ref={sectionRef} className="bg-[#e8d7c9] relative">
       {/* Work Header */}
       <div
-        className="sticky bg-[#e8d7c9] z-20 px-8 py-4 border-b border-black/10"
+        className="sticky bg-[#e8d7c9] z-30 px-8 py-4 border-b border-black/10"
         style={{ top: `${stickyTop}px` }}
       >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -125,59 +93,58 @@ export default function WorkSection() {
         </div>
       </div>
 
-      {/* Project Items */}
+      {/* Project Items - 각 프로젝트가 독립적으로 스크롤됨 */}
       <div className="relative">
-        {projects.map((project, index) => (
-          <div
-            key={index}
-            ref={(el) => { itemRefs.current[index] = el; }}
-            className="sticky bg-[#e8d7c9]"
-            style={{ top: `${stickyTop + 48}px` }}
-          >
-            {/* Project Header */}
-            <div className="border-t border-black/20 px-8 py-4 cursor-pointer hover:bg-black/5 transition-colors">
-              <div className="max-w-7xl mx-auto flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                  <span className="text-xs font-sans text-black/50 w-6">
-                    {project.num}
-                  </span>
-                  <h3 className="text-xl md:text-2xl font-sans font-medium text-black">
-                    {project.title}
-                  </h3>
-                </div>
-                <div className="flex items-center gap-8">
-                  <div className="hidden md:flex items-center gap-1">
-                    {project.tags.map((tag, i) => (
-                      <span key={i} className="text-xs font-sans text-black/50">
-                        {tag}
-                        {i < project.tags.length - 1 && <sup className="text-[#F96706]">*</sup>}
-                        {i < project.tags.length - 1 && ' '}
-                      </span>
-                    ))}
+        {projects.map((project, index) => {
+          // 모든 헤더의 sticky top 위치 동일 (Work 헤더 바로 아래)
+          const itemStickyTop = stickyTop + workHeaderHeight;
+
+          return (
+            <div key={index} className="relative">
+              {/* Project Header - sticky로 고정됨 */}
+              <div
+                className="sticky bg-[#e8d7c9]"
+                style={{ top: `${itemStickyTop}px`, zIndex: 20 + index }}
+              >
+                {/* 실제 헤더 내용 */}
+                <div className="border-t border-black/20 px-8 py-4 cursor-pointer hover:bg-black/5 transition-colors">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <span className="text-xs font-sans text-black/50 w-6">
+                      {project.num}
+                    </span>
+                    <h3 className="text-xl md:text-2xl font-sans font-medium text-black">
+                      {project.title}
+                    </h3>
                   </div>
-                  <span className="text-sm font-sans text-black/70">
-                    ( {project.year} )
-                  </span>
-                  <span className="w-3 h-3 rounded-full bg-[#F96706]"></span>
+                  <div className="flex items-center gap-8">
+                    <div className="hidden md:flex items-center gap-1">
+                      {project.tags.map((tag, i) => (
+                        <span key={i} className="text-xs font-sans text-black/50">
+                          {tag}
+                          {i < project.tags.length - 1 && <sup className="text-[#F96706]">*</sup>}
+                          {i < project.tags.length - 1 && ' '}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-sm font-sans text-black/70">
+                      ( {project.year} )
+                    </span>
+                    <span className="w-3 h-3 rounded-full bg-[#F96706]"></span>
+                  </div>
+                </div>
                 </div>
               </div>
-            </div>
 
-            {/* Project Image - 활성화 시 표시 */}
-            <div
-              className={`overflow-hidden transition-all duration-500 ease-out ${
-                activeIndex === index ? 'max-h-[70vh] opacity-100' : 'max-h-0 opacity-0'
-              }`}
-            >
+              {/* Project Image - 항상 펼쳐져 있음 */}
               <div className="relative w-full h-[70vh] bg-black/10">
-                {/* Placeholder - 실제 이미지로 교체 가능 */}
                 <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black/20 to-black/40">
                   <span className="text-white/50 text-2xl font-sans">{project.title}</span>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Bottom border */}
