@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
-import FlyingBugsAnimation from './FlyingBugsAnimation';
+import FlyingBugsAnimation, { DEFAULT_CONFIG } from './FlyingBugsAnimation';
 import BugInteractionOverlay from './BugInteractionOverlay';
 import Clock from './Clock';
 
@@ -65,7 +65,7 @@ export default function HeroSection() {
             }}
           >
             <FlyingBugsAnimation
-              imageUrl="/animation.gif"
+              imageUrl={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/animation.gif`}
               style={{ width: '100vw', height: '100vh', display: 'flex', scale: animationScale, justifyContent: 'center', alignItems: 'center', top: topPosition }}
             />
           </div>
@@ -194,7 +194,7 @@ export function HeroTitle() {
         <div className="px-4 md:px-8 py-4">
           <div className="mx-auto">
             <Image
-              src="/logo_text1.svg"
+              src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/logo_text1.svg`}
               alt="IHATEFLYINGBUGS"
               width={1305}
               height={193}

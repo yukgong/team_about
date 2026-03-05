@@ -120,7 +120,7 @@ export const DEFAULT_CONFIG: AsciiConfig = {
 
 export default function FlyingBugsAnimation({
   config: customConfig,
-  imageUrl = '/animation.gif',
+  imageUrl = `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/animation.gif`,
   isGif = true,
   className,
   style,
