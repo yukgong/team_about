@@ -5,6 +5,7 @@ import Image from 'next/image';
 import FlyingBugsAnimation, { DEFAULT_CONFIG } from './FlyingBugsAnimation';
 import BugInteractionOverlay from './BugInteractionOverlay';
 import Clock from './Clock';
+import { basePath } from '@/lib/basePath';
 
 // 스크롤 진행률 (0~1) 계산 훅
 function useScrollProgress() {
@@ -65,12 +66,12 @@ export default function HeroSection() {
             }}
           >
             <FlyingBugsAnimation
-              imageUrl={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/animation.gif`}
+              imageUrl={`${basePath}/animation.gif`}
               style={{ width: '100vw', height: '100vh', display: 'flex', scale: animationScale, justifyContent: 'center', alignItems: 'center', top: topPosition }}
             />
           </div>
           {/* Bug Interaction Overlay - Click to splat! */}
-          <BugInteractionOverlay totalBugs={8} />
+          <BugInteractionOverlay totalBugs={DEFAULT_CONFIG.bugCount} />
         </div>
       </div>
 
@@ -194,7 +195,7 @@ export function HeroTitle() {
         <div className="px-4 md:px-8 py-4">
           <div className="mx-auto">
             <Image
-              src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/logo_text1.svg`}
+              src={`${basePath}/logo_text1.svg`}
               alt="IHATEFLYINGBUGS"
               width={1305}
               height={193}
