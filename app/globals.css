@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-parchment: #F2EDE0;
+  --color-moss: #3D6B47;
+  --color-earth: #6B4F2A;
+  --color-forest: #2C3A28;
+  --color-amber: #D4824A;
+  --color-terracotta: #C87854;
+  --color-sage: #A5B5A3;
+
+  /* Tech-inspired colors from references */
+  --color-electric-blue: #4169E1;
+  --color-neon-green: #00FF41;
+  --color-deep-blue: #1E3A8A;
+  --color-light-blue: #93C5FD;
+  --color-dark: #0F172A;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Smooth animations */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  .delay-1000 {
+    animation-delay: 1s;
+  }
+
+  .delay-2000 {
+    animation-delay: 2s;
+  }
+}
