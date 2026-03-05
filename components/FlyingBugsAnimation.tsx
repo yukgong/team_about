@@ -127,7 +127,7 @@ export default function FlyingBugsAnimation({
   canvasStyle,
 }: FlyingBugsAnimationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -152,7 +152,7 @@ export default function FlyingBugsAnimation({
     // ============================================
     // Bug initialization and movement
     // ============================================
-    function initializeBugs(config) {
+    function initializeBugs(config: AsciiConfig) {
       const bugs = [];
       const cols = Math.floor(config.width / config.cellSize);
       const rows = Math.floor(config.height / config.cellSize);
@@ -171,7 +171,7 @@ export default function FlyingBugsAnimation({
       return bugs;
     }
 
-    function updateBugs(bugs, config) {
+    function updateBugs(bugs: any[], config: AsciiConfig) {
       const cols = Math.floor(config.width / config.cellSize);
       const rows = Math.floor(config.height / config.cellSize);
       const morphChance = (config.bugMorphSpeed || 50) / 100 * 0.1;
@@ -239,7 +239,7 @@ export default function FlyingBugsAnimation({
     // Brightness-based character selection
     // (matches ascii-engine.ts selectCharByBrightness)
     // ============================================
-    function selectCharByBrightness(brightness, levels, fallbackChar) {
+    function selectCharByBrightness(brightness: number, levels: AsciiConfig['brightnessLevels'], fallbackChar: string) {
       const sorted = [...levels].sort((a, b) => a.threshold - b.threshold);
       for (const level of sorted) {
         if (brightness <= level.threshold) {
@@ -253,7 +253,7 @@ export default function FlyingBugsAnimation({
     // Floyd-Steinberg dithering
     // (matches ascii-engine.ts applyDithering)
     // ============================================
-    function applyDithering(brightnessMap, levels, strength) {
+    function applyDithering(brightnessMap: number[][], levels: AsciiConfig['brightnessLevels'], strength: number) {
       const rows = brightnessMap.length;
       const cols = brightnessMap[0]?.length || 0;
       const dithered = brightnessMap.map(row => [...row]);
@@ -296,7 +296,7 @@ export default function FlyingBugsAnimation({
     // (matches ascii-engine.ts preprocessImage)
     // Returns a NEW ImageData to avoid modifying original
     // ============================================
-    function applyPreprocessing(imageData, preprocessing) {
+    function applyPreprocessing(imageData: ImageData, preprocessing: AsciiConfig['preprocessing']) {
       const { gamma, blackPoint, whitePoint, blur, grain, invert } = preprocessing;
       const width = imageData.width;
       const height = imageData.height;
@@ -393,11 +393,11 @@ export default function FlyingBugsAnimation({
     // (for static image: extracts brightness from imageData)
     // (matches ascii-engine.ts generateFrame)
     // ============================================
-    function generateFrameWithBrightness(bugs, config, precomputedBrightnessMap, imageData) {
+    function generateFrameWithBrightness(bugs: any[], config: AsciiConfig & { imageData?: ImageData }, precomputedBrightnessMap: number[][] | null, imageData: ImageData | null) {
       const cols = Math.floor(config.width / config.cellSize);
       const rows = Math.floor(config.height / config.cellSize);
-      const grid = [];
-      const colors = [];
+      const grid: string[][] = [];
+      const colors: string[][] = [];
 
       // Build brightness map
       let brightnessMap = precomputedBrightnessMap;
@@ -471,15 +471,15 @@ export default function FlyingBugsAnimation({
     // Legacy generateFrame wrapper for React component
     // (React component uses config.imageData)
     // ============================================
-    function generateFrame(bugs, config) {
-      return generateFrameWithBrightness(bugs, config, null, config.imageData);
+    function generateFrame(bugs: any[], config: AsciiConfig & { imageData?: ImageData }) {
+      return generateFrameWithBrightness(bugs, config, null, config.imageData ?? null);
     }
 
     // ============================================
     // Draw frame to canvas
     // (matches AsciiCanvas.tsx drawFrame exactly)
     // ============================================
-    function drawFrame(ctx, frame, config, bugs) {
+    function drawFrame(ctx: CanvasRenderingContext2D, frame: { grid: string[][]; colors: string[][] }, config: AsciiConfig, bugs: any[]) {
       const cols = Math.floor(config.width / config.cellSize);
       const rows = Math.floor(config.height / config.cellSize);
       const actualCellSize = config.cellSize + (config.spacing || 0);
